@@ -9,8 +9,10 @@ const Navbar = () => {
     <div className="navbar bg-base-100 shadow-sm container px-4 mx-auto">
       <div className="flex-1">
         <div className="flex gap-2 items-center">
-          <img className="w-auto h-7" src={logo} alt="" />
-          <span className="font-bold">SoloSphere</span>
+          <Link to={'/'}>
+            <img className="w-auto h-7" src={logo} alt="" />
+            <span className="font-bold">SoloSphere</span>
+          </Link>
         </div>
       </div>
       <div className="flex-none">
