@@ -9,7 +9,7 @@ const Navbar = () => {
     <div className="navbar bg-base-100 shadow-sm container px-4 mx-auto">
       <div className="flex-1">
         <div className="flex gap-2 items-center">
-          <Link to={'/'}>
+          <Link to={"/"}>
             <img className="w-auto h-7" src={logo} alt="" />
             <span className="font-bold">SoloSphere</span>
           </Link>
@@ -48,10 +48,12 @@ const Navbar = () => {
               className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
             >
               <li>
-                <div className="justify-between">Add Job</div>
+                <Link to={"/add-job"} className="justify-between">
+                  Add Job
+                </Link>
               </li>
               <li>
-                <div>My Posted Jobs</div>
+                <Link to={"/my-posted-job"}>My Posted Jobs</Link>
               </li>
               <li>
                 <div>My Bids</div>

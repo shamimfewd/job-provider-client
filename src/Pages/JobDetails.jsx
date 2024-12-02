@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { useLoaderData } from "react-router";
 import { AuthContext } from "../Provider/AuthProvider";
-import React, { useState } from "react";
+import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import axios from "axios";
@@ -15,7 +15,7 @@ const JobDetails = () => {
   const {
     _id,
     jobTitle,
-    buyerEmail,
+    buyer,
     category,
     deadline,
     description,
@@ -24,8 +24,9 @@ const JobDetails = () => {
   } = loadedData || {};
 
   const handleFormSubmission = async (e) => {
-    if (user?.email === buyerEmail) return toast.error("Action not Permuted");
     e.preventDefault();
+    if (user?.email === buyer?.email) return toast.error("Action not Permuted");
+ 
     const form = e.target;
     const jobId = _id;
     const price = parseFloat(form.price.value);
@@ -46,7 +47,7 @@ const JobDetails = () => {
       price,
       comment,
       userEmail,
-      buyerEmail,
+      buyerEmail: buyer?.email,
       status,
       deadline,
       category,
@@ -54,11 +55,7 @@ const JobDetails = () => {
 
     try {
       const { data } = await axios.post("http://localhost:5000/bid", bidData);
-      // if (data.insertedId) {
-      //   alert("ok");
-      // }
-
-      alert("ok");
+      toast.success("bid is success");
       console.log(data);
     } catch (error) {
       console.log(error);
@@ -70,7 +67,7 @@ const JobDetails = () => {
       <div className="flex-1  px-4 py-7 bg-white rounded-md shadow-md md:min-h-[350px]">
         <div className="flex items-center justify-between">
           <span className="text-sm font-light text-gray-800 ">
-            Deadline: 12/08/2024
+            Deadline: {new Date(deadline).toLocaleDateString()}
           </span>
           <span className="px-4 py-1 text-xs text-blue-800 uppercase bg-blue-200 rounded-full ">
             Web Development
@@ -84,17 +81,17 @@ const JobDetails = () => {
 
           <p className="mt-2 text-lg text-gray-600 ">{description} </p>
           <p className="mt-6 text-sm font-bold text-gray-600 ">
-            Buyer Details:{buyerEmail}
+            Buyer Details:{}
           </p>
           <div className="flex items-center gap-5">
             <div>
-              <p className="mt-2 text-sm  text-gray-600 ">Name: Jhankar Vai.</p>
+              <p className="mt-2 text-sm  text-gray-600 ">Name: {buyer.name}</p>
               <p className="mt-2 text-sm  text-gray-600 ">
-                Email: jhankar@mahbub.com
+                Email: {buyer.email}
               </p>
             </div>
             <div className="rounded-full object-cover overflow-hidden w-14 h-14">
-              <img src="" alt="" />
+              <img src={buyer?.photo} alt="" />
             </div>
           </div>
           <p className="mt-6 text-lg font-bold text-gray-600 ">
