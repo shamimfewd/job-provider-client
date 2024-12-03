@@ -1,10 +1,12 @@
 import { useContext } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router";
 import { AuthContext } from "../../Provider/AuthProvider";
 import toast from "react-hot-toast";
 
 const Register = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state || "/";
   const {
     user,
     setUser,
@@ -41,7 +43,7 @@ const Register = () => {
       await createUser(email, pass);
       await updateUserProfile(name, photo);
       setUser({ ...user, photoURL: photo, displayName: name });
-      navigate("/");
+      navigate(from, { replace: true });
       toast.success("SignUp Success");
     } catch (error) {
       console.log(error);
