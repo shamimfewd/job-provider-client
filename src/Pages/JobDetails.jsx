@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { useLoaderData } from "react-router";
+import { useLoaderData, useNavigate } from "react-router";
 import { AuthContext } from "../Provider/AuthProvider";
 import { useState } from "react";
 import DatePicker from "react-datepicker";
@@ -10,23 +10,24 @@ import toast from "react-hot-toast";
 const JobDetails = () => {
   const { user } = useContext(AuthContext);
   const loadedData = useLoaderData();
+  const navigate = useNavigate();
   const [startDate, setStartDate] = useState(new Date());
 
   const {
     _id,
     jobTitle,
-    buyer,
-    category,
-    deadline,
     description,
     minPrice,
     maxPrice,
+    category,
+    deadline,
+    buyer,
   } = loadedData || {};
 
   const handleFormSubmission = async (e) => {
     e.preventDefault();
     if (user?.email === buyer?.email) return toast.error("Action not Permuted");
- 
+
     const form = e.target;
     const jobId = _id;
     const price = parseFloat(form.price.value);
@@ -38,25 +39,26 @@ const JobDetails = () => {
     }
 
     const comment = form.comment.value;
-    const userEmail = user?.email;
     const deadline = startDate;
+    const email = user?.email;
     const status = "Pending";
 
     const bidData = {
       jobId,
       price,
-      comment,
-      userEmail,
-      buyerEmail: buyer?.email,
-      status,
       deadline,
+      comment,
+      jobTitle,
       category,
+      email,
+      status,
+      buyer,
     };
 
     try {
       const { data } = await axios.post("http://localhost:5000/bid", bidData);
       toast.success("bid is success");
-      console.log(data);
+      navigate("/my-bids");
     } catch (error) {
       console.log(error);
     }
