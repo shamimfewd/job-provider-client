@@ -1,14 +1,14 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { AuthContext } from "../Provider/AuthProvider";
 import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
-import axios from "axios";
+import useAuth from "../Hooks/useAuth";
+import useAxiosSecure from "../Hooks/useAxiosSecure";
 
 const AddJob = () => {
-  const { user } = useContext(AuthContext);
-  console.log(user);
+  const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
   const [startDate, setStartDate] = useState(new Date());
   const navigate = useNavigate();
 
@@ -39,11 +39,11 @@ const AddJob = () => {
       },
     };
 
-    console.log(jobData);
     try {
-      const { data } = await axios.post("http://localhost:5000/job", jobData);
+      await axiosSecure.post("/job", jobData);
       toast.success("Post is successful");
-      console.log(data);
+
+      navigate("/my-posted-job");
     } catch (error) {
       console.log(error);
       toast.error("An error occurred while posting the job");

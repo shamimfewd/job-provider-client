@@ -2,6 +2,7 @@ import { useContext } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { AuthContext } from "../../Provider/AuthProvider";
 import toast from "react-hot-toast";
+import axios from "axios";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -22,7 +23,14 @@ const Register = () => {
   // google signin
   const handleGoogleSignin = async () => {
     try {
-      await signInWithGoogle();
+      const result = await signInWithGoogle();
+      const { data } = await axios.post(
+        `http://localhost:5000/jwt`,
+        {
+          email: result?.user?.email,
+        },
+        { withCredentials: true }
+      );
       toast.success("signin success");
       navigate("/");
     } catch (error) {
@@ -40,9 +48,17 @@ const Register = () => {
     const pass = form.password.value;
 
     try {
-      await createUser(email, pass);
+      const result = await createUser(email, pass);
       await updateUserProfile(name, photo);
-      setUser({ ...user, photoURL: photo, displayName: name });
+      setUser({ ...result?.user, photoURL: photo, displayName: name });
+      const { data } = await axios.post(
+        `http://localhost:5000/jwt`,
+        {
+          email: result?.user?.email,
+        },
+        { withCredentials: true }
+      );
+
       navigate(from, { replace: true });
       toast.success("SignUp Success");
     } catch (error) {

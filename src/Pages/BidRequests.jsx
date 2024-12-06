@@ -1,9 +1,11 @@
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../Provider/AuthProvider";
+import { useEffect, useState } from "react";
 import axios from "axios";
+import useAxiosSecure from "../Hooks/useAxiosSecure";
+import useAuth from "../Hooks/useAuth";
 
 const BidRequests = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
   const [bids, setBids] = useState([]);
 
   useEffect(() => {
@@ -11,15 +13,18 @@ const BidRequests = () => {
   }, [user]);
 
   const getData = async () => {
-    const { data } = await axios(
-      `http://localhost:5000/bid-requests/${user?.email}`
-    );
+    const { data } = await axiosSecure(`/bid-requests/${user?.email}`);
     setBids(data);
   };
 
   // handle status
-  const handleStatus = (id, prevStatus, status) => {
-    console.log(id, prevStatus, status);
+  const handleStatus = async (id, prevStatus, status) => {
+    if (prevStatus === status) return;
+
+    await axios.patch(`http://localhost:5000/bid/${id}`, {
+      status,
+    });
+    getData();
   };
   return (
     <section className="container px-4 mx-auto pt-12">
@@ -129,6 +134,7 @@ const BidRequests = () => {
                             onClick={() =>
                               handleStatus(bid._id, bid.status, "In Progress")
                             }
+                            disabled={bid.status === "Complete"}
                             className="text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none"
                           >
                             <svg
@@ -147,7 +153,13 @@ const BidRequests = () => {
                             </svg>
                           </button>
 
-                          <button className="text-gray-500 transition-colors duration-200   hover:text-yellow-500 focus:outline-none">
+                          <button
+                            onClick={() =>
+                              handleStatus(bid._id, bid.status, "Rejected")
+                            }
+                            disabled={bid.status === "Complete"}
+                            className="text-gray-500 transition-colors duration-200   hover:text-yellow-500 focus:outline-none"
+                          >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
                               fill="none"

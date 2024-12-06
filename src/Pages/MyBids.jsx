@@ -1,9 +1,10 @@
-import axios from "axios";
-import { useContext, useEffect, useState } from "react";
-import { AuthContext } from "../Provider/AuthProvider";
+import { useEffect, useState } from "react";
+import useAuth from "../Hooks/useAuth";
+import useAxiosSecure from "../Hooks/useAxiosSecure";
 
 const MyBids = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
+  const axiosSecure = useAxiosSecure();
   const [bids, setBids] = useState([]);
   console.log(bids);
 
@@ -12,12 +13,16 @@ const MyBids = () => {
   }, [user]);
 
   const getData = async () => {
-    const { data } = await axios(
-      `http://localhost:5000/my-bids/${user?.email}`
-    );
+    const { data } = await axiosSecure(`/my-bids/${user?.email}`);
     setBids(data);
   };
 
+  const handleStatus = async (id, status) => {
+    await axiosSecure.patch(`/bid/${id}`, {
+      status,
+    });
+    getData();
+  };
   return (
     <section className="container px-4 mx-auto pt-12">
       <div className="flex items-center gap-x-3">
@@ -111,7 +116,10 @@ const MyBids = () => {
                         </div>
                       </td>
                       <td className="px-4 py-4 text-sm whitespace-nowrap">
+                        {/* complete button */}
                         <button
+                          disabled={bid.status !== "In Progress"}
+                          onClick={() => handleStatus(bid._id, "Complete")}
                           title="Mark Complete"
                           className="text-gray-500 transition-colors duration-200   hover:text-red-500 focus:outline-none disabled:cursor-not-allowed"
                         >
