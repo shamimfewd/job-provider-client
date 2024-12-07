@@ -1,27 +1,38 @@
-import { useEffect, useState } from "react";
-import axios from "axios";
 import useAxiosSecure from "../Hooks/useAxiosSecure";
 import useAuth from "../Hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 
 const BidRequests = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
-  const [bids, setBids] = useState([]);
+  const {
+    data: bids = [],
+    isLoading,
+    refetch,
+    isError,
+    error,
+  } = useQuery({
+    queryFn: () => getData(),
+    queryKey: ["bids"],
+  });
 
-  useEffect(() => {
-    getData();
-  }, [user]);
+  console.log(bids);
+  // const [bids, setBids] = useState([]);
+
+  // useEffect(() => {
+  //   getData();
+  // }, [user]);
 
   const getData = async () => {
     const { data } = await axiosSecure(`/bid-requests/${user?.email}`);
-    setBids(data);
+    return data;
   };
 
   // handle status
   const handleStatus = async (id, prevStatus, status) => {
     if (prevStatus === status) return;
 
-    await axios.patch(`http://localhost:5000/bid/${id}`, {
+    await axiosSecure.patch(`/bid/${id}`, {
       status,
     });
     getData();
