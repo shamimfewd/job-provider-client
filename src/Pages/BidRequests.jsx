@@ -1,10 +1,12 @@
 import useAxiosSecure from "../Hooks/useAxiosSecure";
 import useAuth from "../Hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const BidRequests = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
+  const queryClient = useQueryClient();
+  // get data with tanstack query
   const {
     data: bids = [],
     isLoading,
@@ -12,36 +14,47 @@ const BidRequests = () => {
     isError,
     error,
   } = useQuery({
+    queryKey: ["bids", user?.email],
     queryFn: () => getData(),
-    queryKey: ["bids"],
   });
-
-  console.log(bids);
-  // const [bids, setBids] = useState([]);
-
-  // useEffect(() => {
-  //   getData();
-  // }, [user]);
 
   const getData = async () => {
     const { data } = await axiosSecure(`/bid-requests/${user?.email}`);
     return data;
   };
 
+  // patch data with tanstack query
+  const { mutateAsync } = useMutation({
+    mutationFn: async ({ id, status }) => {
+      await axiosSecure.patch(`/bid/${id}`, { status });
+    },
+
+    onSuccess: () => {
+      console.log("wow, data is updated");
+      //refresh ui fon latest data
+      // refetch();
+
+      queryClient.invalidateQueries({ queryKey: ["bids"] });
+    },
+  });
+
   // handle status
   const handleStatus = async (id, prevStatus, status) => {
     if (prevStatus === status) return;
-
-    await axiosSecure.patch(`/bid/${id}`, {
-      status,
-    });
+    // await axiosSecure.patch(`/bid/${id}`, {
+    //   status,
+    // });
     getData();
+
+    await mutateAsync({ id, status });
   };
+
+  if (isLoading) return <p>Loading...</p>;
+  if (isError || error) return <p>error...</p>;
   return (
     <section className="container px-4 mx-auto pt-12">
       <div className="flex items-center gap-x-3">
         <h2 className="text-lg font-medium text-gray-800 ">Bid Requests</h2>
-
         <span className="px-3 py-1 text-xs text-blue-600 bg-blue-100 rounded-full ">
           {bids.length} Requests
         </span>
