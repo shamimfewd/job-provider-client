@@ -5,16 +5,32 @@ import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
 import useAuth from "../Hooks/useAuth";
 import useAxiosSecure from "../Hooks/useAxiosSecure";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 const AddJob = () => {
   const { user } = useAuth();
   const axiosSecure = useAxiosSecure();
+  const queryClient = useQueryClient();
   const [startDate, setStartDate] = useState(new Date());
   const navigate = useNavigate();
 
+  const { mutateAsync } = useMutation({
+    mutationFn: async (jobData) => {
+      await axiosSecure.post("/job", jobData);
+    },
+    onSuccess: () => {
+      toast.success("Post is successful");
+      queryClient.invalidateQueries({ queryKey: "job" });
+      navigate("/my-posted-job");
+    },
+    onError: (error) => {
+      console.error("job posting failed", error);
+      toast.error("Failed to post the job. Please try again.");
+    },
+  });
+
   const handleFormSubmission = async (e) => {
     e.preventDefault();
-
     const form = e.target;
     const jobTitle = form.jobTitle.value;
     const email = form.email.value;
@@ -26,7 +42,6 @@ const AddJob = () => {
     // Create the bidData object
     const jobData = {
       jobTitle,
-
       minPrice,
       maxPrice,
       deadline: startDate,
@@ -40,13 +55,9 @@ const AddJob = () => {
     };
 
     try {
-      await axiosSecure.post("/job", jobData);
-      toast.success("Post is successful");
-
-      navigate("/my-posted-job");
+      await mutateAsync(jobData);
     } catch (error) {
-      console.log(error);
-      toast.error("An error occurred while posting the job");
+      console.error(error);
     }
   };
 

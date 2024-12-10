@@ -10,7 +10,7 @@ const BidRequests = () => {
   const {
     data: bids = [],
     isLoading,
-    refetch,
+
     isError,
     error,
   } = useQuery({
@@ -32,8 +32,6 @@ const BidRequests = () => {
     onSuccess: () => {
       console.log("wow, data is updated");
       //refresh ui fon latest data
-      // refetch();
-
       queryClient.invalidateQueries({ queryKey: ["bids"] });
     },
   });
