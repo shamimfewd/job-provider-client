@@ -1,15 +1,15 @@
-import { useContext } from "react";
 import { useLoaderData, useNavigate } from "react-router";
-import { AuthContext } from "../Provider/AuthProvider";
 import { useState } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import axios from "axios";
 import toast from "react-hot-toast";
+import useAuth from "../Hooks/useAuth";
+import useAxiosSecure from "../Hooks/useAxiosSecure";
 
 const JobDetails = () => {
-  const { user } = useContext(AuthContext);
+  const { user } = useAuth();
   const loadedData = useLoaderData();
+  const axiosSecure = useAxiosSecure();
   const navigate = useNavigate();
   const [startDate, setStartDate] = useState(new Date());
 
@@ -56,11 +56,13 @@ const JobDetails = () => {
     };
 
     try {
-      const { data } = await axios.post("http://localhost:5000/bid", bidData);
+      await axiosSecure.post("/bid", bidData);
       toast.success("bid is success");
       navigate("/my-bids");
     } catch (error) {
       console.log(error);
+      toast.success(error.response.data);
+      e.target.reset();
     }
   };
   return (
@@ -117,6 +119,7 @@ const JobDetails = () => {
                 id="price"
                 type="text"
                 name="price"
+                required
                 className="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-200 rounded-md   focus:border-blue-400 focus:ring-blue-300 focus:ring-opacity-40  focus:outline-none focus:ring"
               />
             </div>
