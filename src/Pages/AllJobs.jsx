@@ -6,33 +6,37 @@ const AllJobs = () => {
   const [itemPerPage, setItemPerPage] = useState(4);
   const [count, setCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+  const [filter, setFilter] = useState("");
+  const [sort, setSort] = useState("");
+
   const [jobs, setJobs] = useState([]);
 
   useEffect(() => {
     const getData = async () => {
       const { data } = await axios(
-        `http://localhost:5000/all-jobs?page=${currentPage}&size=${itemPerPage}`
+        `http://localhost:5000/all-jobs?page=${currentPage}&size=${itemPerPage}&filter=${filter}&sort=${sort}`
       );
       setJobs(data);
+      console.log(data);
       // setCount(data.length);
     };
     getData();
-  }, [currentPage, itemPerPage]);
+  }, [currentPage, itemPerPage, filter, sort]);
 
   useEffect(() => {
     const getCount = async () => {
-      const { data } = await axios("http://localhost:5000/jobs-count");
+      const { data } = await axios(
+        `http://localhost:5000/jobs-count?filter=${filter}`
+      );
       setCount(data.count);
     };
     getCount();
-  }, []);
+  }, [filter]);
 
-  const pages = [...Array(Math.ceil(count / itemPerPage)).keys()].map(
+  const numberOfPages = Math.ceil(count / itemPerPage);
+  const pages = [...Array(Math.ceil(numberOfPages)).keys()].map(
     (element) => element + 1
   );
-
-  // console.log(jobs);
-  console.log(count);
 
   const handlePaginationBtn = (value) => {
     console.log(value);
@@ -44,6 +48,11 @@ const AllJobs = () => {
         <div className="flex flex-col md:flex-row justify-center items-center gap-5 ">
           <div>
             <select
+              onChange={(e) => {
+                setFilter(e.target.value);
+                setCurrentPage(1);
+              }}
+              value={filter}
               name="category"
               id="category"
               className="border p-4 rounded-lg"
@@ -72,8 +81,13 @@ const AllJobs = () => {
           </form>
           <div>
             <select
-              name="category"
-              id="category"
+              onChange={(e) => {
+                setSort(e.target.value);
+                setCurrentPage(1);
+              }}
+              value={sort}
+              name="sort"
+              id="sort"
               className="border p-4 rounded-md"
             >
               <option value="">Sort By Deadline</option>
@@ -130,7 +144,7 @@ const AllJobs = () => {
         ))}
 
         <button
-          disabled={currentPage === itemPerPage}
+          disabled={currentPage === numberOfPages}
           onClick={() => handlePaginationBtn(currentPage + 1)}
           className="px-4 py-2 mx-1 text-gray-700 transition-colors duration-300 transform bg-gray-200 rounded-md hover:bg-blue-500 disabled:hover:bg-gray-200 disabled:hover:text-gray-500 hover:text-white disabled:cursor-not-allowed disabled:text-gray-500"
         >
